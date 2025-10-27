@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulátor Brzdících Procent</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚂</text></svg>">
+<style>
+    /* --- ZÁKLADNÍ (SVĚTLÝ) STYL --- */
+    :root {
+        --barva-pozadi: #000000;
+        --barva-kontejneru: #fff;
+        --barva-textu: #333;
+        --barva-ramecku: #ddd;
+        --barva-vysledek-pozadi: #e9ecef;
+        --barva-tlumeneho-textu: #6c757d; 
+        --barva-navesti: #FF8C00; /* Tmavší oranžová */
+        
+        /* Barvy pro tlačítka */
+        --tlacitko-hlavni: #007bff;
+        --tlacitko-hlavni-hover: #0056b3;
+        --tlacitko-reset: #dc3545;
+        --tlacitko-reset-hover: #c82333;
+    }
+
+    /* --- TMavý REŽIM (DARK MODE) --- */
+    body.dark-mode {
+        --barva-pozadi: #121212;
+        --barva-kontejneru: #1f1f1f;
+        --barva-textu: #ffffff;
+        --barva-ramecku: #3a3a3a;
+        --barva-vysledek-pozadi: #2d2d2d;
+        --barva-tlumeneho-textu: white;
+        --barva-navesti: #FF8C00; 
+    }
+    
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: var(--barva-pozadi);
+        color: var(--barva-textu);
+        transition: background-color 0.3s, color 0.3s;
+    }
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: var(--barva-kontejneru);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); 
+        border-radius: 12px;
+    }
+    h1 {
+        color: var(--barva-textu);
+        text-align: center;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    /* *** ZMĚNA ZDE: Zvětšení písma v zadávacích polích *** */
+    input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        box-sizing: border-box;
+        border: 1px solid var(--barva-ramecku);
+        border-radius: 6px; 
+        background-color: var(--barva-kontejneru); 
+        color: var(--barva-textu);
+        font-size: 2em; /* ZVĚTŠENÍ PÍSMA NA 2X */
+        height: 50px; /* Přidáno pro lepší zarovnání */
+    }
+
+    /* --- STYLY TLAČÍTEK --- */
+    .tlacitka {
+        display: flex;
+        gap: 15px; 
+        margin-top: 20px;
+    }
+    .tlacitka button {
+        flex-grow: 1; 
+        color: white; 
+        padding: 12px 15px;
+        border: none;
+        border-radius: 8px; 
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    }
+    
+    /* Hlavní tlačítko (Vypočítat) */
+    .tlacitka .main-button {
+        background-color: var(--tlacitko-hlavni);
+    }
+    .tlacitka .main-button:hover {
+        background-color: var(--tlacitko-hlavni-hover);
+        transform: translateY(-2px); 
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Reset tlačítko (Vynulovat) */
+    .tlacitka .reset-button {
+        background-color: var(--tlacitko-reset); 
+    }
+    .tlacitka .reset-button:hover {
+        background-color: var(--tlacitko-reset-hover);
+        transform: translateY(-2px); 
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* --- STYLY VÝSLEDKU --- */
+    #vysledek {
+        margin-top: 25px;
+        padding: 15px;
+        border: 1px solid var(--barva-ramecku);
+        background-color: var(--barva-vysledek-pozadi);
+        border-radius: 8px;
+    }
+    #vysledek p {
+        margin: 5px 0;
+        font-size: 1.1em;
+    }
+    .vysledek-hlavni {
+        font-weight: bold;
+        color: #28a745; /* Zelená pro Novou rychlost */
+        font-size: 1.2em;
+    }
+    /* TŘÍDA PRO RYCHLOST U NÁVĚSTI */
+    .vysledek-navest {
+        font-weight: bold;
+        color: var(--barva-navesti); 
+        font-size: 1.2em;
+    }
+    .footer {
+        margin-top: 20px;
+        text-align: right;
+        font-size: 0.8em;
+        color: var(--barva-tlumeneho-textu); 
+        opacity: 0.9;
+    }
+
+    /* Styl pro poznámky/postup výpočtu */
+    #vysledek hr + p {
+         color: var(--barva-tlumeneho-textu) !important;
+    }
+    
+    /* Styl pro přepínač */
+    .theme-switcher {
+        text-align: right;
+        margin-bottom: 10px;
+    }
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 45px;
+        height: 25px;
+    }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 25px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 19px;
+        width: 19px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+    input:checked + .slider:before {
+        transform: translateX(19px);
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="theme-switcher">
+        Tmavý režim:
+        <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <h1>🚂 Kalkulátor Rychlosti Vlaku</h1>
+    <p>Zadejte potřebné a skutečné brzdící procenta a maximální rychlost pro výpočet snížení rychlosti.</p>
+    
+<label for="potrebnaBrzdna">Potřebná brzdící %:</label>
+<input type="number" id="potrebnaBrzdna" value="0" min="0" onfocus="this.select()" onkeydown="handleEnterKey(event, 'skutecnaBrzdna')">
+
+<label for="skutecnaBrzdna">Skutečná brzdící %:</label>
+<input type="number" id="skutecnaBrzdna" value="0" min="0" onfocus="this.select()" onkeydown="handleEnterKey(event, 'maxRychlost')">
+
+<label for="maxRychlost">Maximální rychlost vlaku (V_max):</label>
+<input type="number" id="maxRychlost" value="0" min="0" onfocus="this.select()" onkeydown="handleEnterKey(event, null)">
+    
+    <div class="tlacitka">
+        <button class="main-button" onclick="vypocitejRychlost()">Vypočítat Novou Rychlost</button>
+        <button class="reset-button" onclick="resetHodnoty()">Vynulovat hodnoty</button>
+    </div>
+    
+    <div id="vysledek">
+        </div>
+
+    <div class="footer">
+        Created by PetrLepič
+    </div>
+</div>
+
+<script>
+    // --- FUNKCE PRO DARK MODE ---
+    function enableDarkMode(shouldSave = true) {
+        document.body.classList.add('dark-mode');
+        document.getElementById('darkModeToggle').checked = true;
+        if (typeof localStorage !== 'undefined' && shouldSave) {
+            localStorage.setItem('darkMode', 'enabled');
+        }
+    }
+
+    function disableDarkMode(shouldSave = true) {
+        document.body.classList.remove('dark-mode');
+        document.getElementById('darkModeToggle').checked = false;
+        if (typeof localStorage !== 'undefined' && shouldSave) {
+            localStorage.setItem('darkMode', 'disabled');
+        }
+    }
+
+    // --- FUNKCE PRO PŘESKAKOVÁNÍ MEZI POLI KLÁVESOU ENTER (PRO PC) ---
+    function handleEnterKey(event, nextElementId) {
+        // Kontrola, zda byla stisknuta klávesa Enter (KeyCode 13)
+        if (event.keyCode === 13) {
+            event.preventDefault(); // Zabrání výchozímu chování (např. odeslání formuláře)
+            
+            // Pokud je definované další ID, přesuň fokus
+            if (nextElementId) {
+                document.getElementById(nextElementId).focus();
+            } else {
+                // Pokud je toto poslední pole, spusť výpočet
+                vypocitejRychlost();
+            }
+        }
+    }
+
+
+    // --- FUNKCE PRO RESET ---
+    function resetHodnoty() {
+        document.getElementById('potrebnaBrzdna').value = 0;
+        document.getElementById('skutecnaBrzdna').value = 0;
+        document.getElementById('maxRychlost').value = 0;
+        document.getElementById('vysledek').innerHTML = '';
+        // Po resetu nastav fokus zpět na první pole pro snazší zadávání
+        document.getElementById('potrebnaBrzdna').focus(); 
+    }
+    
+    // --- FUNKCE PRO VÝPOČET RYCHLOSTI (zde ponecháno beze změny) ---
+    function vypocitejRychlost() {
+        const potrebnaBrzdna = parseFloat(document.getElementById('potrebnaBrzdna').value);
+        const skutecnaBrzdna = parseFloat(document.getElementById('skutecnaBrzdna').value);
+        const maxRychlost = parseFloat(document.getElementById('maxRychlost').value);
+
+        const vysledekDiv = document.getElementById('vysledek');
+        vysledekDiv.innerHTML = '';
+        
+        if (isNaN(potrebnaBrzdna) || isNaN(skutecnaBrzdna) || isNaN(maxRychlost) || potrebnaBrzdna < 0 || skutecnaBrzdna < 0 || maxRychlost < 0) {
+            vysledekDiv.innerHTML = '<p style="color: red;">Zadejte platné kladné číselné hodnoty (nebo nulu).</p>';
+            return;
+        }
+
+        let novaRychlost = maxRychlost;
+        let chybejiciProcenta = potrebnaBrzdna - skutecnaBrzdna;
+        let snizeniRychlosti = 0;
+        let poznamky = [];
+        
+        if (maxRychlost === 0 && chybejiciProcenta > 0) {
+            vysledekDiv.innerHTML = '<p class="vysledek-hlavni" style="color: red;"><strong>Maximální rychlost vlaku je 0 km/h. Nelze provést výpočet snížení.</strong></p>';
+            return;
+        }
+
+        if (chybejiciProcenta <= 0) {
+            novaRychlost = maxRychlost;
+            snizeniRychlosti = 0;
+            poznamky.push(`Skutečná b.% (${skutecnaBrzdna} %) jsou dostačující.`);
+            
+            vysledekDiv.innerHTML = `
+                <p><strong>Chybějící %:</strong> 0</p>
+                <p><strong>Snížení rychlosti:</strong> 0 km/h</p>
+                <p class="vysledek-hlavni" style="color: #28a745;"><strong>Nová maximální rychlost:</strong> ${maxRychlost} km/h</p>
+                <hr><p style="font-size: 0.8em; color: var(--barva-tlumeneho-textu); margin-top: 10px;"><strong>Postup výpočtu:</strong><br>${poznamky.join('<br>')}</p>
+            `;
+            return;
+        } 
+        
+        // Výpočet snížení
+        if (skutecnaBrzdna <= 45) {
+            snizeniRychlosti = chybejiciProcenta * 2;
+            poznamky.push(`Skutečná b.% jsou ${skutecnaBrzdna} (<= 45), snížení je ${chybejiciProcenta} * 2 = ${snizeniRychlosti} km/h.`);
+        } else {
+            snizeniRychlosti = chybejiciProcenta * 1;
+            poznamky.push(`Skutečná b.% jsou ${skutecnaBrzdna} (> 45), snížení je ${chybejiciProcenta} * 1 = ${snizeniRychlosti} km/h.`);
+        }
+
+        let zakladniSnizenaRychlost = maxRychlost - snizeniRychlosti;
+        novaRychlost = zakladniSnizenaRychlost;
+        poznamky.push(`Základní snížená rychlost (V_nová): ${maxRychlost} - ${snizeniRychlosti} = ${zakladniSnizenaRychlost} km/h.`);
+
+        // Zvážení rozkladu (pro V_max > 120 km/h)
+        if (maxRychlost > 120) {
+            const rychlostSNaveT = zakladniSnizenaRychlost - 20;
+            poznamky.push(`Maximální rychlost vlaku (${maxRychlost} km/h) je > 120 km/h, zvažuje se "Rozklad".`);
+            
+            if (rychlostSNaveT >= 120) {
+                // Rozklad LZE POUŽÍT
+                poznamky.push(`Rychlost u návěsti výstraha (${rychlostSNaveT} km/h) je >= 120 km/h. Rozklad LZE POUŽÍT. Platí obě rychlosti.`);
+                
+                vysledekDiv.innerHTML += `
+                    <p><strong>Chybějící %:</strong> ${chybejiciProcenta}</p>
+                    <p><strong>Snížení rychlosti:</strong> ${snizeniRychlosti} km/h</p>
+                    <p class="vysledek-hlavni"><strong>Nová maximální rychlost:</strong> ${zakladniSnizenaRychlost} km/h</p>
+                    <p class="vysledek-navest"><strong>Rychlost u návěsti výstraha:</strong> ${rychlostSNaveT} km/h</p>
+                `;
+                novaRychlost = zakladniSnizenaRychlost;
+            } else {
+                // Rozklad NELZE POUŽÍT: Platí pouze NIŽŠÍ RYCHLOST (rychlostSNaveT)
+                novaRychlost = rychlostSNaveT; 
+                
+                poznamky.push(`Rychlost u návěsti výstraha (${rychlostSNaveT} km/h) je < 120 km/h. Rozklad NELZE POUŽÍT. Konečná rychlost je NIŽŠÍ: ${novaRychlost} km/h.`);
+                
+                vysledekDiv.innerHTML += `
+                    <p><strong>Chybějící %:</strong> ${chybejiciProcenta}</p>
+                    <p><strong>Snížení rychlosti:</strong> ${snizeniRychlosti} km/h</p>
+                    <p class="vysledek-hlavni"><strong>Nová maximální rychlost (Konečná):</strong> ${novaRychlost} km/h</p>
+                    <p style="font-size: 0.9em; color: var(--barva-navesti);"> (Rozklad nelze použít. Konečná rychlost je ${novaRychlost} km/h.)</p>
+                `;
+            }
+        } else {
+            // Rychlosti 120 km/h a méně - bez rozkladu
+            novaRychlost = zakladniSnizenaRychlost;
+            poznamky.push(`Maximální rychlost vlaku (${maxRychlost} km/h) NENÍ > 120 km/h. Rozklad se NEŘEŠÍ.`);
+
+             vysledekDiv.innerHTML += `
+                <p><strong>Chybějící %:</strong> ${chybejiciProcenta}</p>
+                <p><strong>Snížení rychlosti:</strong> ${snizeniRychlosti} km/h</p>
+                <p class="vysledek-hlavni"><strong>Nová maximální rychlost:</strong> ${novaRychlost} km/h</p>
+            `;
+        }
+
+        if (novaRychlost < 0) {
+             vysledekDiv.innerHTML = '<p class="vysledek-hlavni" style="color: red;"><strong>Nová maximální rychlost:</strong> 0 km/h. Kritický nedostatek brzdících procent!</p>';
+             novaRychlost = 0;
+        }
+        
+        // Zobrazení poznámek (pro kontrolu)
+        vysledekDiv.innerHTML += '<hr><p style="font-size: 0.8em; color: var(--barva-tlumeneho-textu); margin-top: 10px;"><strong>Postup výpočtu:</strong><br>' + poznamky.join('<br>') + '</p>';
+    }
+
+    // --- NAČTENÍ PREFERENCÍ A PŘIPOJENÍ POSLUCHAČE PŘI NAČTENÍ STRÁNKY ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // 1. Načtení a nastavení uloženého stavu (persistence)
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('darkMode') === 'enabled') {
+            enableDarkMode(false);
+        } else {
+            disableDarkMode(false);
+        }
+
+        // 2. TENTO BLOK JE KLÍČOVÝ: Připojení event listeneru pro přepínání
+        darkModeToggle.addEventListener('change', () => {
+            if (darkModeToggle.checked) {
+                enableDarkMode();
+            } else {
+                disableDarkMode();
+            }
+        });
+    });
+</script></body>
+</html>
