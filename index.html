@@ -317,10 +317,10 @@
         // Výpočet snížení
         if (skutecnaBrzdna <= 45) {
             snizeniRychlosti = chybejiciProcenta * 2;
-            poznamky.push(`Skutečná b.% jsou ${skutecnaBrzdna} (<= 45), snížení je ${chybejiciProcenta} * 2 = ${snizeniRychlosti} km/h.`);
+            poznamky.push(`Skutečná brzdící % jsou ${skutecnaBrzdna} (<= 45), snížení je ${chybejiciProcenta} * 2 = ${snizeniRychlosti} km/h.`);
         } else {
             snizeniRychlosti = chybejiciProcenta * 1;
-            poznamky.push(`Skutečná b.% jsou ${skutecnaBrzdna} (> 45), snížení je ${chybejiciProcenta} * 1 = ${snizeniRychlosti} km/h.`);
+            poznamky.push(`Skutečná brzdící % jsou ${skutecnaBrzdna} (> 45), snížení je ${chybejiciProcenta} * 1 = ${snizeniRychlosti} km/h.`);
         }
 
         let zakladniSnizenaRychlost = maxRychlost - snizeniRychlosti;
@@ -398,4 +398,5 @@
         });
     });
 </script></body>
+
 </html>
