@@ -327,10 +327,10 @@
         novaRychlost = zakladniSnizenaRychlost;
         poznamky.push(`Základní snížená rychlost (V_nová): ${maxRychlost} - ${snizeniRychlosti} = ${zakladniSnizenaRychlost} km/h.`);
 
-        // Zvážení rozkladu (pro V_max > 120 km/h)
-        if (maxRychlost > 120) {
+        // Zvážení rozkladu (pro V_max >= 120 km/h)
+        if (maxRychlost >= 120) {
             const rychlostSNaveT = zakladniSnizenaRychlost - 20;
-            poznamky.push(`Maximální rychlost vlaku (${maxRychlost} km/h) je > 120 km/h, zvažuje se "Rozklad".`);
+            poznamky.push(`Maximální rychlost vlaku (${maxRychlost} km/h) je >= 120 km/h, zvažuje se "Rozklad".`);
             
             if (rychlostSNaveT >= 120) {
                 // Rozklad LZE POUŽÍT
@@ -398,6 +398,4 @@
         });
     });
 </script></body>
-
 </html>
-
